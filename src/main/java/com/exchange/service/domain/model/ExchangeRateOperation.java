@@ -16,14 +16,21 @@ public class ExchangeRateOperation {
     private LocalDateTime operationDate;
     private String currencySource;
     private String currencyDestination;
+    private BigDecimal convertAmount;
+    private double rate;
     public ExchangeRateOperation(BigDecimal amount,
                                  LocalDateTime operationDate,
                                  String currencySource,
-                                 String currencyDestination) {
+                                 String currencyDestination,
+                                 BigDecimal convertAmount,
+                                 double rate) {
         this.amount = amount;
         this.operationDate = operationDate;
         this.currencySource = currencySource;
         this.currencyDestination = currencyDestination;
+        this.convertAmount = convertAmount;
+        this.rate = rate;
+
     }
 }
 

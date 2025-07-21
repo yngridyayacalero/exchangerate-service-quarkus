@@ -12,6 +12,8 @@ public class ExchangeRateOperationMapper {
         entity.operationDate = operation.getOperationDate();
         entity.currencySource = operation.getCurrencySource();
         entity.currencyDestination = operation.getCurrencyDestination();
+        entity.convertAmount = operation.getConvertAmount();
+        entity.rate = operation.getRate();
         return entity;
     };
 }

@@ -15,6 +15,7 @@ import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.function.Supplier;
 
 @ApplicationScoped
 public class PerformExchangeUseCase {
@@ -42,17 +43,17 @@ public class PerformExchangeUseCase {
                 .onItem().transformToUni(optional -> {
                     if (optional.isPresent()) {
                         LOG.debugf("GET_FROM_REDIS: %s -> %s (%s)", currencySource, currencyDestination, date);
-                        return Panache.withTransaction(() -> calculateAndPersist(amount, optional.get()));
+                        return withTransaction(() -> calculateAndPersist(amount, optional.get()));
                     }
                     LOG.debugf("GET_FROM_DATABASE: %s -> %s (%s)", currencySource, currencyDestination, date);
-                    return Panache.withTransaction(() ->
+                    return withTransaction(() ->
                             exchangeRateRepository
                                     .findBySourceAndDestinationAndDate(currencySource, currencyDestination, date)
                                     .onItem().ifNull().failWith(() -> {
                                                 LOG.errorf("ERROR_EXCHANGE_RATE_NO_FOUND %s %s", currencySource, currencyDestination);
                                                 return new ExchangeRateNotFoundException("EXCHANGE_RATE_NOT_FOUND",
                                                         "Not found exchange rate " + currencySource + " a " + currencyDestination + " en " + date);
-                                        }
+                                            }
                                     )
                                     .onItem().transformToUni(exchangeRate ->
                                             exchangeRateCache.put(currencySource, currencyDestination, date, exchangeRate)
@@ -74,7 +75,9 @@ public class PerformExchangeUseCase {
                                     amount,
                                     LocalDate.now().atStartOfDay(),
                                     exchangeRate.getCurrencySource(),
-                                    exchangeRate.getCurrencyDestination()
+                                    exchangeRate.getCurrencyDestination(),
+                                    result,
+                                    exchangeRate.getRate()
                             );
 
                             return exchangeRateOperationRepository
@@ -89,4 +92,9 @@ public class PerformExchangeUseCase {
                         }
                 );
     }
+
+    protected <T> Uni<T> withTransaction(Supplier<Uni<T>> supplier) {
+        return Panache.withTransaction(supplier);
+    }
+
 }

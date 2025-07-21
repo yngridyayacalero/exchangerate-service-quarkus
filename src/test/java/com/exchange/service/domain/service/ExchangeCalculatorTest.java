@@ -4,9 +4,7 @@ import com.exchange.service.domain.port.out.ExchangeRateCalculateRepository;
 import com.exchange.service.infrastructure.common.ExchangeRateCalculateRepositoryImpl;
 import io.smallrye.mutiny.Uni;
 import org.junit.jupiter.api.Test;
-
 import java.math.BigDecimal;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ExchangeCalculatorTest {
