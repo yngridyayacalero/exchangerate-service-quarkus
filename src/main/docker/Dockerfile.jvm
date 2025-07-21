@@ -1,0 +1,17 @@
+# Imagen base con Java 17
+FROM eclipse-temurin:17-jdk as runtime
+
+# Directorio de trabajo dentro del contenedor
+WORKDIR /app
+
+# Copiamos los archivos del build de Quarkus (modo JVM)
+COPY target/quarkus-app/lib/ /app/lib/
+COPY target/quarkus-app/*.jar /app/
+COPY target/quarkus-app/app/ /app/app/
+COPY target/quarkus-app/quarkus/ /app/quarkus/
+
+# Exponemos el puerto 8080
+EXPOSE 8080
+
+# Ejecutamos el jar correcto generado por Quarkus
+ENTRYPOINT ["java", "-jar", "/app/quarkus-run.jar"]
