@@ -12,6 +12,8 @@ import io.quarkus.hibernate.reactive.panache.Panache;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
+import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.jboss.logging.Logger;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -34,6 +36,7 @@ public class PerformExchangeUseCase {
     @Inject
     ExchangeRateCache exchangeRateCache;
 
+    //TODO , incluir tolerancia a fallos y modificar las pruebas unitarias
     public Uni<ExchangeRateResultDTO> execute(BigDecimal amount,
                                               String currencySource,
                                               String currencyDestination,
@@ -43,10 +46,10 @@ public class PerformExchangeUseCase {
                 .onItem().transformToUni(optional -> {
                     if (optional.isPresent()) {
                         LOG.debugf("GET_FROM_REDIS: %s -> %s (%s)", currencySource, currencyDestination, date);
-                        return withTransaction(() -> calculateAndPersist(amount, optional.get()));
+                        return this.withTransaction(() -> calculateAndPersist(amount, optional.get()));
                     }
                     LOG.debugf("GET_FROM_DATABASE: %s -> %s (%s)", currencySource, currencyDestination, date);
-                    return withTransaction(() ->
+                    return this.withTransaction(() ->
                             exchangeRateRepository
                                     .findBySourceAndDestinationAndDate(currencySource, currencyDestination, date)
                                     .onItem().ifNull().failWith(() -> {
